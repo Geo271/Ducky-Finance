@@ -49,7 +49,6 @@ export default function PayeeInput() {
           <option value="">Leave blank (None)</option>
           
           <optgroup label="People">
-            <option value="JenJen">JenJen</option>
             <option value="Family Member">Family Member</option>
             <option value="Friend">Friend</option>
             <option value="Employer">Employer / Client</option>
@@ -60,14 +59,12 @@ export default function PayeeInput() {
             <option value="Lazada">Lazada</option>
             <option value="Meralco">Meralco</option>
             <option value="Maynilad">Maynilad</option>
-            <option value="Grocery Store">Grocery Store (SM/Robinsons/Puregold)</option>
-            <option value="Convenience Store">Convenience Store (7-Eleven/Uncle John's)</option>
-            <option value="Grab / JoyRide / Angkas">Grab / JoyRide / Angkas</option>
+            <option value="Netflix">Netflix</option>
           </optgroup>
 
           <optgroup label="Create Your Own">
             <option value="ADD_CUSTOM" className="font-bold text-pink-600 bg-pink-50">
-              ✨ + Add New Payee
+              + Add New Payee
             </option>
           </optgroup>
         </select>
