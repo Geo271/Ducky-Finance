@@ -8,7 +8,9 @@ export async function addTransaction(formData: FormData) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  
+  // 1. FIXED: Return the error instead of throwing it
+  if (!user) return { error: 'Not authenticated' }
 
   const amount = Number(formData.get('amount'))
   const flow_type = formData.get('flow_type') as string
@@ -33,11 +35,15 @@ export async function addTransaction(formData: FormData) {
       user_id: user.id // DATA ISOLATION
     }])
 
+  // 2. FIXED: Return the error instead of throwing it
   if (error) {
-    throw new Error(`Failed to log transaction: ${error.message}`)
+    return { error: `Failed to log transaction: ${error.message}` }
   }
 
   revalidatePath('/')
   revalidatePath('/ledger')
   revalidatePath('/reports')
+  revalidatePath('/cashflow')
+
+  return { success: true }
 }

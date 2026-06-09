@@ -15,7 +15,8 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    redirect('/login?error=Invalid email or password')
+    // FIXED: Return the error so our frontend toast can display it
+    return { error: 'Invalid email or password' }
   }
 
   revalidatePath('/', 'layout')
@@ -33,17 +34,17 @@ export async function signup(formData: FormData) {
     email, 
     password,
     options: {
-      // Automatically confirms the email so you don't have to check your inbox during local testing
-      emailRedirectTo: 'http://localhost:3000',
+      // FIXED: Made this dynamic so it works locally AND on Vercel
+      emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     }
   })
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+    // FIXED: Return the exact Supabase error message to the frontend toast
+    return { error: error.message }
   }
 
   // Once registered, redirect them instantly to the home dashboard
   revalidatePath('/', 'layout')
   redirect('/')
 }
-

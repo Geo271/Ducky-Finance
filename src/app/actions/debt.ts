@@ -25,7 +25,7 @@ export async function addDebtItem(formData: FormData) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+ if (!user) return { error: 'Not authenticated' }
 
   const creditor_name = formData.get('creditor_name') as string
   const total_due = Number(formData.get('total_due'))
@@ -48,10 +48,11 @@ export async function addDebtItem(formData: FormData) {
       user_id: user.id // DATA ISOLATION
     }])
 
-  if (error) throw new Error(`Failed to create debt: ${error.message}`)
+  if (error) return { error: error.message }
 
   revalidatePath('/debt')
   revalidatePath('/')
+  return { success: true }
 }
 
 export async function recordDebtPayment(formData: FormData) {

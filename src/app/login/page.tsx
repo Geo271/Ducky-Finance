@@ -1,8 +1,24 @@
 // src/app/login/page.tsx
-import { login, signup } from './actions'
+'use client' // 1. Added this to allow client-side interactivity
+
+import { login } from './actions'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
+import SubmitButton from '@/components/SubmitButton'
 
 export default function LoginPage() {
+  
+  // 2. We intercept the form submission here
+  const handleLogin = async (formData: FormData) => {
+    const result = await login(formData)
+
+    // 3. If the backend sent back an error, trigger the red toast!
+    if (result?.error) {
+      toast.error(result.error)
+    }
+    // Note: If successful, the server action automatically handles the redirect to '/'
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF6F6] text-zinc-800 flex items-center justify-center p-4 font-sans relative overflow-hidden">
       <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-pink-200/20 rounded-full blur-[120px] pointer-events-none" />
@@ -14,37 +30,36 @@ export default function LoginPage() {
           <p className="text-xs text-zinc-400 mt-1">Sign in or register your independent financial manager account</p>
         </header>
 
-        <form className="flex flex-col gap-4">
+        {/* 4. Swapped formAction on the button for action on the form */}
+        <form action={handleLogin} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">Email Address</label>
             <input id="email" name="email" type="email" required placeholder="your.name@example.com" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-200" />
           </div>
 
-          {/* Password Field with inline Forgot Password Link */}
-<div className="flex flex-col gap-1.5 mb-6">
-  
-  {/* The Label and the Link MUST be inside this specific div together */}
-  <div className="flex items-center justify-between">
-    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Password</label>
-    
-    {/* NUCLEAR FIX: Using a standard <a> tag forces the browser to navigate */}
-    <a href="/forgot-password" className="text-[10px] font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider">
-      Forgot Password?
-    </a>
-  </div>
-  
-  <input 
-    name="password" 
-    type="password" 
-    required 
-    placeholder="••••••••" 
-    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" 
-  />
-</div>
+          <div className="flex flex-col gap-1.5 mb-6">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Password</label>
+              <a href="/forgot-password" className="text-[10px] font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider">
+                Forgot Password?
+              </a>
+            </div>
+            
+            <input 
+              name="password" 
+              type="password" 
+              required 
+              placeholder="••••••••" 
+              className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" 
+            />
+          </div>
 
-          <button formAction={login} className="mt-2 w-full py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold text-xs tracking-wide transition-all shadow-sm">
-            Sign In Account
-          </button>
+          {/* 5. Our new universal button handles the loading state automatically! */}
+          <SubmitButton 
+            defaultText="Sign In Account"
+            loadingText="Verifying..."
+            className="mt-2 w-full py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold text-xs tracking-wide transition-all shadow-sm"
+          />
           
           <p className="text-center text-xs text-zinc-400 mt-4 font-medium">
             Don't have an account?{' '}

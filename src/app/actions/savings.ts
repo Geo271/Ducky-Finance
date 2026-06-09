@@ -65,7 +65,7 @@ export async function addSavingsGoal(formData: FormData) {
   
   // 1. Get the current user
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const title = formData.get('title') as string
   const target_amount = Number(formData.get('target_amount'))
@@ -84,9 +84,10 @@ export async function addSavingsGoal(formData: FormData) {
       user_id: user.id // <--- THIS IS THE FIX
     }])
 
-  if (error) throw new Error('Failed to add goal: ' + error.message)
+  if (error) return { error: error.message }
 
   revalidatePath('/savings')
+  return { success: true }
 }
 
 // NEW: This is the missing function your dynamic page is looking for

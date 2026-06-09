@@ -1,10 +1,29 @@
 // src/app/cashflow/page.tsx
+'use client' // 1. Added use client for interactivity
+
+import { useRef } from 'react'
 import { addTransaction } from '@/app/actions/cashflow'
 import Link from 'next/link'
 import CategoryInput from '@/components/CategoryInput'
 import PayeeInput from '@/components/PayeeInput'
+import toast from 'react-hot-toast' // 2. Import toast
+import SubmitButton from '@/components/SubmitButton' // 3. Import our new button
 
 export default function CashflowPage() {
+  const formRef = useRef<HTMLFormElement>(null)
+
+  // 4. Intercept the form submission
+  const handleAction = async (formData: FormData) => {
+    const result = await addTransaction(formData)
+
+    if (result?.error) {
+      toast.error(result.error) // Show red error toast
+    } else {
+      toast.success('Transaction logged successfully!') // Show green success toast
+      formRef.current?.reset() // Automatically clear the form for the next entry
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#FCF8F8] text-zinc-800 p-6 md:p-12 font-sans selection:bg-pink-100 selection:text-pink-900">
       <header className="mb-10 max-w-2xl mx-auto flex flex-col gap-2">
@@ -18,7 +37,8 @@ export default function CashflowPage() {
       </header>
 
       <main className="max-w-2xl mx-auto">
-        <form action={addTransaction} className="bg-white p-8 rounded-3xl border border-pink-100/60 shadow-[0_4px_20px_-4px_rgba(244,63,94,0.08)] flex flex-col gap-6">
+        {/* 5. Swapped action to handleAction and added the ref */}
+        <form ref={formRef} action={handleAction} className="bg-white p-8 rounded-3xl border border-pink-100/60 shadow-[0_4px_20px_-4px_rgba(244,63,94,0.08)] flex flex-col gap-6">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
@@ -45,10 +65,9 @@ export default function CashflowPage() {
             </select>
           </div>
        
-
           <CategoryInput />
 
-             {/* Transaction Date Input */}
+          {/* Transaction Date Input */}
           <div className="flex flex-col gap-2">
             <label htmlFor="transaction_date" className="text-xs font-bold text-zinc-500 uppercase tracking-wide">
               Transaction Date
@@ -58,15 +77,18 @@ export default function CashflowPage() {
               id="transaction_date" 
               name="transaction_date" 
               required
-              defaultValue={new Date().toISOString().split('T')[0]} // Defaults to today's date automatically
+              defaultValue={new Date().toISOString().split('T')[0]} 
               className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-400 transition-all text-sm"
             />
           </div>
           <PayeeInput />
 
-          <button type="submit" className="mt-4 w-full py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold tracking-wide transition-all shadow-[0_4px_14px_0_rgba(244,63,94,0.39)] hover:shadow-[0_6px_20px_rgba(244,63,94,0.23)] hover:-translate-y-0.5">
-            Log Transaction
-          </button>
+          {/* 6. Replace the old button with our smart SubmitButton */}
+          <SubmitButton 
+            defaultText="Log Transaction"
+            loadingText="Saving to Ledger..."
+            className="mt-4 w-full py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold tracking-wide transition-all shadow-[0_4px_14px_0_rgba(244,63,94,0.39)] hover:shadow-[0_6px_20px_rgba(244,63,94,0.23)] hover:-translate-y-0.5"
+          />
         </form>
       </main>
     </div>
