@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 
 interface BotMetrics {
   totalMoney: number
@@ -116,32 +117,39 @@ export default function FinBot({ metrics }: { metrics: BotMetrics }) {
     <>
       {/* Floating Action Button (FAB) Trigger */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-zinc-900 hover:bg-zinc-800 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all duration-300 group"
-      >
-        {isOpen ? (
-          <span className="text-xl font-bold">✕</span>
-        ) : (
-          <div className="relative">
-            <span className="text-2xl">🤖</span>
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-pink-500 rounded-full border-2 border-zinc-900 animate-pulse" />
-          </div>
-        )}
-      </button>
+  onClick={() => setIsOpen(!isOpen)}
+  className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-zinc-900 hover:bg-zinc-800 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all duration-300 group overflow-hidden"
+>
+  {isOpen ? (
+    <span className="text-xl font-bold">✕</span>
+  ) : (
+    <div className="relative w-10 h-10 flex items-center justify-center">
+      <Image 
+        src="/psyduck.png" 
+        alt="FinBot Mascot" 
+        width={40} 
+        height={40} 
+        className="object-contain" 
+      />
+    </div>
+  )}
+</button>
 
       {/* Slide-out Overlay Drawer */}
       <div className={`fixed inset-y-0 right-0 z-40 w-full sm:w-[380px] bg-white border-l border-zinc-100 shadow-2xl transition-transform duration-300 ease-out flex flex-col
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
       `}>
-        {/* Header Section */}
-        <div className="p-4 bg-gradient-to-r from-zinc-900 to-zinc-800 text-white flex items-center justify-between pt-6 sm:pt-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-sm shadow-inner">🤖</div>
-            <div>
-              <h3 className="font-bold text-xs tracking-wide uppercase text-pink-400">Ducky</h3>
-              <p className="text-[10px] text-zinc-400 font-medium">Financial Assistant</p>
-            </div>
-          </div>
+       {/* Header Section */}
+<div className="p-4 bg-gradient-to-r from-zinc-900 to-zinc-800 text-white flex items-center justify-between pt-6 sm:pt-4">
+  <div className="flex items-center gap-2.5">
+    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-inner overflow-hidden">
+      <Image src="/psyduck.png" alt="Ducky" width={32} height={32} />
+    </div>
+    <div>
+      <h3 className="font-bold text-xs tracking-wide uppercase text-pink-400">Ducky</h3>
+      <p className="text-[10px] text-zinc-400 font-medium">Financial Assistant</p>
+    </div>
+  </div>
           <button onClick={() => setIsOpen(false)} className="text-zinc-400 hover:text-white text-xs font-bold uppercase tracking-wider px-2 py-1">
             Minimize
           </button>

@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 
-export async function POST() {
+export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -12,7 +12,10 @@ export async function POST() {
   }
 
   revalidatePath('/', 'layout')
-  return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'), {
+  
+  // Use the origin of the request to ensure it redirects to the current domain
+  const requestUrl = new URL(req.url)
+  return NextResponse.redirect(new URL('/login', requestUrl.origin), {
     status: 302,
   })
 }

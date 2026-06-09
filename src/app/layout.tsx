@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "JenJen Financial App",
   description: "Personal wealth ledger and analytics",
+  icons: {
+    icon: '/favicon.ico', // Ensures the browser points to your new icon
+  },
 };
 
 export default function RootLayout({
