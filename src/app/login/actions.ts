@@ -16,7 +16,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     // FIXED: Return the error so our frontend toast can display it
-    return { error: 'Invalid email or password' }
+    return { error: error.message }
   }
 
   revalidatePath('/', 'layout')
