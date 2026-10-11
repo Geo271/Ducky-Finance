@@ -29,20 +29,26 @@ export async function middleware(request: NextRequest) {
   // Verify session securely on the Edge runtime
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Define all routes that unauthenticated users ARE allowed to visit
-  const isPublicAuthRoute = 
-    request.nextUrl.pathname.startsWith('/login') || 
-  request.nextUrl.pathname.startsWith('/register') ||
-  request.nextUrl.pathname.startsWith('/forgot-password') ||
-  request.nextUrl.pathname.startsWith('/update-password');
+  const pathname = request.nextUrl.pathname
 
-  // Protect internal financial routes: if NOT logged in and NOT on a public route -> redirect to login
-  if (!user && !isPublicAuthRoute) {
+  // Public gateway pages that logged-in users should NEVER see
+  const isAuthGatewayRoute = 
+    pathname.startsWith('/login') || 
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/forgot-password')
+
+  const isUpdatePasswordRoute = pathname.startsWith('/update-password')
+
+  // 1. If NOT logged in:
+  // Allow them on login/register/forgot-password, but block protected app pages AND update-password
+  if (!user && !isAuthGatewayRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Prevent logged-in users from hitting the authorization screens -> redirect to dashboard
-  if (user && isPublicAuthRoute) {
+  // 2. If LOGGED IN:
+  // Redirect away from login / register / forgot-password to dashboard
+  // Notice: /update-password is NOT blocked here, so authenticated users can set their new password!
+  if (user && isAuthGatewayRoute) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
@@ -51,13 +57,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - All common media images (.svg, .png, .jpg, etc.)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
