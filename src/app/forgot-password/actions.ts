@@ -6,18 +6,25 @@ import { redirect } from 'next/navigation'
 
 export async function sendRecoveryEmail(formData: FormData) {
   const supabase = await createClient()
-  const email = formData.get('email') as string
+  const email = (formData.get('email') as string)?.trim()
+
+  if (!email) {
+    return { error: 'Please enter a valid email address.' }
+  }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email)
-  if (error) redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`)
+  
+  if (error) {
+    return { error: error.message }
+  }
 
-  redirect(`/forgot-password/verify?email=${encodeURIComponent(email)}`)
+  return { success: true, email }
 }
 
 export async function verifyRecoveryOtp(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
-  const token = formData.get('token') as string
+  const token = (formData.get('token') as string)?.trim()
 
   const { error } = await supabase.auth.verifyOtp({ 
     email, 
@@ -26,12 +33,10 @@ export async function verifyRecoveryOtp(formData: FormData) {
   })
   
   if (error) {
-    redirect(`/forgot-password/verify?email=${encodeURIComponent(email)}&error=${encodeURIComponent(error.message)}`)
+    return { error: error.message }
   }
 
-  // Redirect specifically to the update-password page
-  // The middleware will now let this pass because of the update we made above
-  redirect('/update-password') 
+  return { success: true }
 }
 
 export async function updateNewPassword(formData: FormData) {
