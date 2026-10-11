@@ -1,6 +1,7 @@
 // src/app/debt/page.tsx
-import { getDebts, addDebtItem, recordDebtPayment, deleteDebt, completeDebt } from '@/app/actions/debt'
+import { getDebts, recordDebtPayment, deleteDebt, completeDebt } from '@/app/actions/debt'
 import Link from 'next/link'
+import CreateDebtForm from '@/components/CreateDebtForm' // 1. Imported your client component
 
 export const revalidate = 0
 
@@ -14,7 +15,7 @@ interface DebtRecord {
   is_installment: boolean
   total_months: number
   remaining_months: number
-  status?: string // Added status tracking property
+  status?: string
 }
 
 export default async function DebtPage() {
@@ -23,7 +24,7 @@ export default async function DebtPage() {
 
   // --- OVERALL AGGREGATE CALCULATIONS ---
   const today = new Date()
-  today.setHours(0, 0, 0, 0) // Reset time to match raw dates accurately
+  today.setHours(0, 0, 0, 0)
 
   // Filter out completed debts from the total outstanding math
   const activeDebts = debts.filter(d => d.status !== 'completed')
@@ -66,48 +67,8 @@ export default async function DebtPage() {
         
         {/* Left Form: Add Debt */}
         <div className="lg:col-span-1">
-          <form action={addDebtItem} className="bg-white p-6 rounded-3xl border border-pink-100/60 shadow-[0_4px_20px_-4px_rgba(244,63,94,0.08)] flex flex-col gap-4 sticky top-6">
-            <h2 className="font-bold text-zinc-800 text-lg mb-1">Log New Account</h2>
-            
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="creditor_name" className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Creditor Name / Platform</label>
-              <input type="text" id="creditor_name" name="creditor_name" required placeholder="e.g., SPayLater, Maya Credit" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-400 transition-all" />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="total_due" className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Total Outstanding Balance (₱)</label>
-              <input type="number" id="total_due" name="total_due" step="0.01" required placeholder="3500.00" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-400 transition-all font-medium" />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="classification" className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Type</label>
-                <select id="classification" name="classification" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-400 transition-all appearance-none cursor-pointer">
-                  <option value="Personal">Personal Dues</option>
-                  <option value="Other">Commercial App</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="due_date" className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Due Date</label>
-                <input type="date" id="due_date" name="due_date" required className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-400 transition-all" />
-              </div>
-            </div>
-
-            <div className="p-3 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-3">
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="is_installment" name="is_installment" className="w-4 h-4 text-pink-500 border-zinc-300 rounded focus:ring-pink-500 cursor-pointer" />
-                <label htmlFor="is_installment" className="text-xs font-bold text-zinc-600 cursor-pointer select-none">Structured Installment Plan</label>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="total_months" className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">Term Duration (Months)</label>
-                <input type="number" id="total_months" name="total_months" min="1" defaultValue="1" className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-pink-200" />
-              </div>
-            </div>
-
-            <button type="submit" className="mt-2 w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold tracking-wide transition-all text-sm shadow-sm">
-              Register Balance
-            </button>
-          </form>
+          {/* 2. Replaced the old raw <form> with the component */}
+          <CreateDebtForm />
         </div>
 
         {/* Right Content: Active Debt Ledgers */}
@@ -116,7 +77,6 @@ export default async function DebtPage() {
             const outstandingRemaining = debt.total_due - debt.amount_paid
             const progressRatio = Math.min((debt.amount_paid / debt.total_due) * 100, 100)
             
-            // Check if status is completed OR math shows it's settled
             const isSettled = debt.status === 'completed' || outstandingRemaining <= 0 || (debt.is_installment && debt.remaining_months <= 0)
 
             const currentMonthTerm = debt.total_months - debt.remaining_months + 1
@@ -182,7 +142,7 @@ export default async function DebtPage() {
                     </div>
                   </div>
 
-                  {/* NEW: ARCHIVE & DELETE CONTROL BAR */}
+                  {/* ARCHIVE & DELETE CONTROL BAR */}
                   <div className="mt-5 pt-4 border-t border-zinc-100 flex items-center justify-between gap-2">
                     {isSettled ? (
                       <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider flex items-center gap-1">
@@ -204,8 +164,6 @@ export default async function DebtPage() {
                       </button>
                     </form>
                   </div>
-                  {/* END CONTROL BAR */}
-
                 </div>
 
                 {/* Direct Action Box */}
